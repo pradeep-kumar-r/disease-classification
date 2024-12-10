@@ -12,4 +12,7 @@ scipy
 fastapi
 pydantic
 scipy
+kaggle
+kagglehub
+python-dotenv
 -e .
