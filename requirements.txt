@@ -1,0 +1,15 @@
+torch
+python-box==6.0.2
+numpy
+pandas
+matplotlib
+seaborn
+tqdm
+pyyaml
+ensure
+joblib
+scipy
+fastapi
+pydantic
+scipy
+-e .
