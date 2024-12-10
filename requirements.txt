@@ -16,4 +16,5 @@ kaggle
 kagglehub
 python-dotenv
 loguru
+ipython
 -e .
