@@ -1,3 +1,7 @@
+"""
+Logging module with the help of loguru
+"""
+
 import sys
 import os
 import yaml
@@ -5,8 +9,9 @@ from loguru import logger
 
 
 # Load config file
-with open("config.yaml", "r") as file:
+with open("config.yaml", "r", encoding="utf-8") as file:
     config = yaml.safe_load(file)
+
 log_path = config['log_folder_path']
 
 # Check & Create the logs directory
