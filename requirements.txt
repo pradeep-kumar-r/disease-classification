@@ -1,4 +1,5 @@
 torch
+torchvision
 python-box==6.0.2
 numpy
 pandas
@@ -17,4 +18,5 @@ kagglehub
 python-dotenv
 loguru
 ipython
+opencv-python
 -e .
