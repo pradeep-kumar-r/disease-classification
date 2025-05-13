@@ -1,10 +1,13 @@
 import os
 import kaggle
 from ..logger import logger
+from ..config.config import DataDownloaderConfig
 
-
+# Singleton
 class DataDownloader:
-    def __init__(self, kaggle_dataset_path: str, data_folder_path: str):
+    def __init__(self, 
+                 kaggle_dataset_path: str=DataDownloaderConfig.kaggle_dataset_path, 
+                 data_folder_path: str=DataDownloaderConfig.data_folder_path):
         self.kaggle_dataset_path = kaggle_dataset_path
         self.data_folder_path = data_folder_path
         self._prepare_download()
@@ -15,7 +18,7 @@ class DataDownloader:
 
         try:
             self.kaggle_api = kaggle.api
-            self.kaggle_api.authenticate()
+            self.kaggle_api.authenticate(username=os.getenv("KAGGLE_USER"), key=os.getenv("KAGGLE_KEY"))
             print("Kaggle API authenticated successfully")
             logger.info("Kaggle API authenticated successfully")
         except Exception as e:

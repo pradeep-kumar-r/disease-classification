@@ -1,13 +1,9 @@
 import os
-from box.exceptions import BoxValueError
 import yaml
-from ..logger import logger
 import json
 import joblib
-from ensure import ensure_annotations
-from box import ConfigBox
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Literal
 import base64
 import cv2
 import matplotlib.pyplot as plt
@@ -43,95 +39,57 @@ def read_yaml(path_to_yaml: Path) -> Dict[Any, Any]:
             loaded_yaml = yaml.safe_load(file)
             logger.info(f"yaml file: {path_to_yaml} loaded successfully")
             return loaded_yaml
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         logger.error(f"Yaml file not found at {path_to_yaml}")
         raise FileNotFoundError("yaml file is empty")
     except Exception as e:
         raise e
     
-def create_directories(path_to_directories: list, verbose=True):
-    """create list of directories
-
-    Args:
-        path_to_directories (list): list of path of directories
-        ignore_log (bool, optional): ignore if multiple dirs is to be created. Defaults to False.
-    """
+def create_directories(path_to_directories: List[Path]) -> None:
     for path in path_to_directories:
         os.makedirs(path, exist_ok=True)
-        if verbose:
-            logger.info(f"created directory at: {path}")
+        logger.info(f"Created directory at: {path}")
 
-def save_json(path: Path, data: dict):
-    """save json data
+def save_json(filepath: Path, data: dict) -> None:
+    if not filepath.exists():
+        logger.error(f"JSON file not found at {filepath}")
+        raise FileNotFoundError(f"JSON file not found at {filepath}")
+    
+    with open(filepath, "w") as file:
+        json.dump(data, file, indent=4)
+    logger.info(f"JSON file saved at: {filepath}")
 
-    Args:
-        path (Path): path to json file
-        data (dict): data to be saved in json file
-    """
-    with open(path, "w") as f:
-        json.dump(data, f, indent=4)
+def load_json(filepath: Path) -> Dict[Any, Any]:
+    if not filepath.exists() or not filepath.endswith(".json"):
+        logger.error(f"JSON file not found at {filepath}")
+        raise FileNotFoundError(f"JSON file not found at {filepath}")
+    
+    with open(filepath, "r") as file:
+        content = json.load(file)
 
-    logger.info(f"json file saved at: {path}")
+    logger.info(f"JSON file loaded succesfully from: {filepath}")
+    return content
 
-def load_json(path: Path) -> ConfigBox:
-    """load json files data
-
-    Args:
-        path (Path): path to json file
-
-    Returns:
-        ConfigBox: data as class attributes instead of dict
-    """
-    with open(path) as f:
-        content = json.load(f)
-
-    logger.info(f"json file loaded succesfully from: {path}")
-    return ConfigBox(content)
-
-def save_bin(data: Any, path: Path):
-    """save binary file
-
-    Args:
-        data (Any): data to be saved as binary
-        path (Path): path to binary file
-    """
-    joblib.dump(value=data, filename=path)
-    logger.info(f"binary file saved at: {path}")
-
-def load_bin(path: Path) -> Any:
-    """load binary data
-
-    Args:
-        path (Path): path to binary file
-
-    Returns:
-        Any: object stored in the file
-    """
-    data = joblib.load(path)
-    logger.info(f"binary file loaded from: {path}")
-    return data
-
-def get_size(path: Path) -> str:
-    """get size in KB
-
-    Args:
-        path (Path): path of the file
-
-    Returns:
-        str: size in KB
-    """
-    size_in_kb = round(os.path.getsize(path)/1024)
-    return f"~ {size_in_kb} KB"
+def get_size(filepath: Path, unit: Literal["KB", "MB", "GB"] = "KB") -> float:
+    match unit:
+        case "KB":
+            return round(os.path.getsize(filepath)/1024)
+        case "MB":
+            return round(os.path.getsize(filepath)/(1024**2))
+        case "GB":
+            return round(os.path.getsize(filepath)/(1024**3))
+        case _:
+            logger.error(f"Invalid unit: {unit}")
+            raise ValueError(f"Invalid unit: {unit}")
 
 def decodeImage(imgstring, fileName):
     imgdata = base64.b64decode(imgstring)
-    with open(fileName, 'wb') as f:
-        f.write(imgdata)
-        f.close()
+    with open(fileName, 'wb') as file:
+        file.write(imgdata)
 
 def encodeImageIntoBase64(croppedImagePath):
-    with open(croppedImagePath, "rb") as f:
-        return base64.b64encode(f.read())
+    with open(croppedImagePath, "rb") as file:
+        return base64.b64encode(file.read())
 
 def show_image(image_path: str) -> None:
     image = cv2.imread(image_path)

@@ -1,18 +1,37 @@
-import os
-from dotenv import load_dotenv
-import yaml
+from dataclasses import dataclass
+from pathlib import Path
+from ..utils.utils import read_yaml
 
 
-# Load env variables
-load_dotenv()
+config = read_yaml(Path("../../../config.yaml"))
 
-# Load config yaml file
-with open("../../../config.yaml", "r") as file:
-    config = yaml.safe_load(file)
 
-data_path = config['data_folder_path']
-logs_path = config['logs_folder_path']
-artefacts_path = config['artefacts_folder_path']
+@dataclass(frozen=True)
+class DataDownloaderConfig:
+    kaggle_dataset_path: str = config['kaggle_dataset_path']
+    data_folder_path: Path = config['data_folder_path']
+    
 
-# Check & Create the data directory
-os.makedirs(data_path, exist_ok=True)
+@dataclass(frozen=True)
+class DataLoaderConfig:
+    data_path: Path = config['data_path']
+    images_path: Path = config['images_folder_path']
+    train_split: float = config['train_split']
+    val_split: float = config['val_split']
+    batch_size: int = config['batch_size']
+    
+    
+@dataclass(frozen=True)
+class LogsConfig:
+    logs_path: Path = config['logs_folder_path']
+   
+    
+@dataclass(frozen=True)
+class ArtefactsConfig:
+    artefacts_path: Path = config['artefacts_folder_path']
+
+
+@dataclass(frozen=True)
+class ModelTrainingConfig:
+    num_epochs: int = config['num_epochs']
+    learning_rate: float = config['learning_rate']
