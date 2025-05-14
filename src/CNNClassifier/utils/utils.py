@@ -33,16 +33,17 @@ def read_csv(csv_path: Path, header: bool = True) -> List[Dict[Any, Any]]:
             data.append(item)
     return data
 
-def read_yaml(path_to_yaml: Path) -> Dict[Any, Any]:
+def read_yaml(filepath: Path) -> Dict[Any, Any]:
     try:
-        with open("path_to_yaml", "r") as file:
+        with open(filepath, "r") as file:
             loaded_yaml = yaml.safe_load(file)
-            logger.info(f"yaml file: {path_to_yaml} loaded successfully")
+            logger.info(f"yaml file: {filepath} loaded successfully")
             return loaded_yaml
     except FileNotFoundError:
-        logger.error(f"Yaml file not found at {path_to_yaml}")
+        logger.error(f"No file found at {filepath}")
         raise FileNotFoundError("yaml file is empty")
     except Exception as e:
+        logger.error(f"Error loading yaml file: {e}")
         raise e
     
 def create_directories(path_to_directories: List[Path]) -> None:

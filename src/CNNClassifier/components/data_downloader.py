@@ -1,7 +1,7 @@
 import os
 import kaggle
-from ..logger import logger
-from ..config.config import DataDownloaderConfig
+from CNNClassifier.logger import logger
+from CNNClassifier.config import DataDownloaderConfig
 
 # Singleton
 class DataDownloader:

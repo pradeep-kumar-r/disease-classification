@@ -4,8 +4,7 @@ from torchvision import transforms
 from PIL import Image
 from typing import Tuple, Optional
 import os
-
-from ..logger import logger
+from CNNClassifier.logger import logger
 
 
 class ImageDataset(Dataset):

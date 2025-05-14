@@ -1,28 +1,18 @@
-"""
-Logging module with the help of loguru
-"""
-
 import sys
 import os
-import yaml
 from loguru import logger
+from CNNClassifier.config import LogsConfig
 
 
-# Load config file
-with open("config.yaml", "r", encoding="utf-8") as file:
-    config = yaml.safe_load(file)
-
-log_path = config['log_folder_path']
-
-# Check & Create the logs directory
+log_path = LogsConfig.log_folder_path
 os.makedirs(log_path, exist_ok=True)
-
-# Add relevant log handlers
 logger.remove()
-logger.add(sys.stderr, level="INFO")
+logger.add(sys.stdout, level="INFO")
 logger.add(f"{log_path}/debug_logs.log", level="DEBUG")
 logger.add(f"{log_path}/logs.log", level="INFO")
 
+
+# Test the logger
 if __name__ == "__main__":
     logger.info("Testing whether logging works correctly")
     logger.debug("DEBUG - Testing whether logging works correctly")

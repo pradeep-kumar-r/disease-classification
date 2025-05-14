@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from pathlib import Path
-from ..utils.utils import read_yaml
+from CNNClassifier.utils.utils import read_yaml
 
 
-config = read_yaml(Path("../../../config.yaml"))
+config = read_yaml(Path("config.yaml"))
 
 
 @dataclass(frozen=True)
@@ -23,7 +23,7 @@ class DataLoaderConfig:
     
 @dataclass(frozen=True)
 class LogsConfig:
-    logs_path: Path = config['logs_folder_path']
+    log_folder_path: Path = config['logs_folder_path']
    
     
 @dataclass(frozen=True)
