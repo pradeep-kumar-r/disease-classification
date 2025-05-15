@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
+import os
 from CNNClassifier.utils.utils import read_yaml
+from dotenv import load_dotenv
 
 
+load_dotenv()
 config = read_yaml(Path("config.yaml"))
 
 
@@ -10,16 +13,19 @@ config = read_yaml(Path("config.yaml"))
 class DataDownloaderConfig:
     kaggle_dataset_path: str = config['kaggle_dataset_path']
     data_folder_path: Path = config['data_folder_path']
+    kaggle_user: str = os.getenv("KAGGLE_USER")
+    kaggle_key: str = os.getenv("KAGGLE_KEY")
     
 
 @dataclass(frozen=True)
 class DataLoaderConfig:
-    data_path: Path = config['data_folder_path']
+    data_folder_path: Path = config['data_folder_path']
     images_path: Path = config['images_folder_path']
     train_split: float = config['train_split']
     val_split: float = config['val_split']
     batch_size: int = config['batch_size']
-    
+    dataset_path: Path = config['dataset_path']
+
     
 @dataclass(frozen=True)
 class ArtefactsConfig:

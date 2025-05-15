@@ -4,9 +4,10 @@ from CNNClassifier.components.model_trainer import ModelTrainer
 from CNNClassifier.logger import logger
 
 
-class DataPipeline:
-    def __init__(self):
-        self.data_downloader = DataDownloader()
+class TrainingPipeline:
+    def __init__(self,
+                 model_trainer: ModelTrainer):
+        self.model_trainer = model_trainer
         self.dataset_factory = DatasetFactory()
 
     def _download_data(self) -> None:

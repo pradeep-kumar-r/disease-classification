@@ -1,59 +1,18 @@
-from cnnClassifier import logger
-from cnnClassifier.pipeline.stage_01_data_ingestion import DataIngestionTrainingPipeline
-from cnnClassifier.pipeline.stage_02_prepare_base_model import PrepareBaseModelTrainingPipeline
-from cnnClassifier.pipeline.stage_03_model_trainer import ModelTrainingPipeline
-from cnnClassifier.pipeline.stage_04_evaluation import EvaluationPipeline
+from CNNClassifier.logger import logger
+from CNNClassifier.pipelines.data_pipeline import DataPipeline
+# from CNNClassifier.pipelines.training_pipeline import DataPipeline
+
+
+def main() -> None:
+      logger.info("\n\n*****\nNEW RUN\n\n")
+      
+      # Step 1: Data Pipeline
+      logger.info("Starting Data Pipeline")
+      data_pipeline = DataPipeline()
+      data_pipeline.run_pipeline()
+      logger.info("Data Pipeline completed")
 
 
 
-STAGE_NAME = "Data Ingestion stage"
-try:
-   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<") 
-   data_ingestion = DataIngestionTrainingPipeline()
-   data_ingestion.main()
-   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-except Exception as e:
-        logger.exception(e)
-        raise e
-
-
-
-
-STAGE_NAME = "Prepare base model"
-try: 
-   logger.info(f"*******************")
-   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
-   prepare_base_model = PrepareBaseModelTrainingPipeline()
-   prepare_base_model.main()
-   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-except Exception as e:
-        logger.exception(e)
-        raise e
-
-
-
-
-STAGE_NAME = "Training"
-try: 
-   logger.info(f"*******************")
-   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
-   model_trainer = ModelTrainingPipeline()
-   model_trainer.main()
-   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-except Exception as e:
-        logger.exception(e)
-        raise e
-
-
-
-STAGE_NAME = "Evaluation stage"
-try:
-   logger.info(f"*******************")
-   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
-   model_evalution = EvaluationPipeline()
-   model_evalution.main()
-   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-
-except Exception as e:
-        logger.exception(e)
-        raise e
+if __name__ == "__main__":
+      main()
