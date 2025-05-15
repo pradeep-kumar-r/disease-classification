@@ -1,5 +1,4 @@
-log_folder_path: logs/
-data_path: data/data.csv
+data_folder_path: data/
 images_folder_path: data/images/
 artefacts_folder_path: artefacts/
 train_split: 0.7

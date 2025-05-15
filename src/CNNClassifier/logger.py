@@ -1,10 +1,9 @@
 import sys
 import os
 from loguru import logger
-from CNNClassifier.config import LogsConfig
 
 
-log_path = LogsConfig.log_folder_path
+log_path = "logs/"
 os.makedirs(log_path, exist_ok=True)
 logger.remove()
 logger.add(sys.stdout, level="INFO")

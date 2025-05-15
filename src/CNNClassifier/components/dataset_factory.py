@@ -10,7 +10,7 @@ class DatasetFactory:
     @staticmethod
     def get_datasets(num_workers: int = 4) -> Tuple[DataLoader, DataLoader, DataLoader]:
         try:
-            full_dataset = ImageDataset(data_path = DataLoaderConfig.data_path,
+            full_dataset = ImageDataset(data_path = DataLoaderConfig.data_folder_path,
                                         images_path = DataLoaderConfig.images_path)
             train_size = int(DataLoaderConfig.train_split * len(full_dataset))
             val_size = int(DataLoaderConfig.val_split) * len(full_dataset)

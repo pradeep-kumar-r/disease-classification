@@ -19,4 +19,7 @@ python-dotenv
 loguru
 ipython
 opencv-python
+uvicorn
+fastapi
+streamlit
 -e .

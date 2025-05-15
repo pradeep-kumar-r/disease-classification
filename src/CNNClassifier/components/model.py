@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import torch.nn as nn
 import torch
 
-class NNModel(ABC):
+class NNModel(ABC, nn.Module):
     @abstractmethod
     def __init__(self, num_classes: int):
         pass
@@ -12,7 +12,7 @@ class NNModel(ABC):
         pass
 
 
-class BasicCNNModel(nn.Module, NNModel):
+class BasicCNNModel(NNModel):
     def __init__(self, num_classes: int):
         super(BasicCNNModel, self).__init__()
         self.num_classes = num_classes

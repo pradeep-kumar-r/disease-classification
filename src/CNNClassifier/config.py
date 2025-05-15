@@ -22,11 +22,6 @@ class DataLoaderConfig:
     
     
 @dataclass(frozen=True)
-class LogsConfig:
-    log_folder_path: Path = config['logs_folder_path']
-   
-    
-@dataclass(frozen=True)
 class ArtefactsConfig:
     artefacts_path: Path = config['artefacts_folder_path']
 
@@ -35,3 +30,10 @@ class ArtefactsConfig:
 class ModelTrainingConfig:
     num_epochs: int = config['num_epochs']
     learning_rate: float = config['learning_rate']
+    
+    
+
+
+if __name__ == "__main__":
+    print(DataDownloaderConfig().data_folder_path)
+    print(LogsConfig().log_folder_path)

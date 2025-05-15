@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from typing import Literal
 from CNNClassifier.logger import logger
-from CNNClassifier.config import ModelTrainingConfig
+from CNNClassifier.config import ModelTrainingConfig, ArtefactsConfig
 from CNNClassifier.components.model import NNModel
 from CNNClassifier.components.dataset_factory import DatasetFactory
 
@@ -37,7 +37,7 @@ class ModelTrainer:
             inputs, labels = inputs.to(self.device), labels.to(self.device)
             
             self.optimizer.zero_grad()
-            outputs = self.model(inputs)
+            outputs = self.model.forward(inputs)
             loss = self.criterion(outputs, labels)
             loss.backward()
             self.optimizer.step()
@@ -86,20 +86,15 @@ class ModelTrainer:
         best_val_acc = 0.0
         
         for epoch in range(self.num_epochs):
-            # Training phase
             train_loss, train_acc = self._train_step(epoch)
-            
-            # Validation phase
             val_loss, val_acc = self._validate()
             
-            # Log metrics
             logger.info(
                 f'Epoch {epoch+1}/{self.num_epochs} - '
                 f'Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, '
                 f'Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}'
             )
 
-            # Save best model
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
                 torch.save({
@@ -107,10 +102,9 @@ class ModelTrainer:
                     'model_state_dict': self.model.state_dict(),
                     'optimizer_state_dict': self.optimizer.state_dict(),
                     'val_acc': val_acc,
-                }, save_path)
+                }, f"{ArtefactsConfig.artefacts_path}")
                 logger.info(f'Model saved with validation accuracy: {val_acc:.4f}')
             
-            # Clear GPU memory if using CUDA
             if self.device == 'cuda':
                 torch.cuda.empty_cache()
 
