@@ -14,7 +14,7 @@ class DataDownloaderConfig:
 
 @dataclass(frozen=True)
 class DataLoaderConfig:
-    data_path: Path = config['data_path']
+    data_path: Path = config['data_folder_path']
     images_path: Path = config['images_folder_path']
     train_split: float = config['train_split']
     val_split: float = config['val_split']
@@ -36,4 +36,3 @@ class ModelTrainingConfig:
 
 if __name__ == "__main__":
     print(DataDownloaderConfig().data_folder_path)
-    print(LogsConfig().log_folder_path)
