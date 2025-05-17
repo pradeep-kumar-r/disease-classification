@@ -1,6 +1,5 @@
-from CNNClassifier.components.data_downloader import DataDownloader
-from CNNClassifier.components.dataset_factory import DatasetFactory
 from CNNClassifier.components.model_trainer import ModelTrainer
+from CNNClassifier.config import TrainingPipelineConfig
 from CNNClassifier.logger import logger
 
 

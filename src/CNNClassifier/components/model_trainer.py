@@ -5,23 +5,23 @@ import torch.nn as nn
 import torch.optim as optim
 from typing import Literal
 from CNNClassifier.logger import logger
-from CNNClassifier.config import ModelTrainingConfig, ArtefactsConfig
 from CNNClassifier.components.model import NNModel
-from CNNClassifier.components.dataset_factory import DatasetFactory
+from CNNClassifier.components.dataset_loader import DatasetLoader
 
 
 class ModelTrainer:
     def __init__(self, 
                  model: NNModel, 
-                 datasets: DatasetFactory, 
-                 num_epochs: int=ModelTrainingConfig.num_epochs, 
+                 train_data_loader: DatasetLoader, 
+                 val_data_loader: DatasetLoader, 
+                 num_epochs: int, 
+                 learning_rate: float, 
                  criterion: nn.Module=nn.CrossEntropyLoss(),
-                 learning_rate: float=ModelTrainingConfig.learning_rate, 
                  device: Literal["cuda", "cpu"]='cuda' if torch.cuda.is_available() else 'cpu'):
         self.device = device
         self.model = model.to(self.device)
-        self.datasets = datasets
-        self.train_dataloader, self.val_dataloader, self.test_dataloader = self.datasets.get_datasets()
+        self.train_data_loader = train_data_loader
+        self.val_data_loader = val_data_loader
         self.num_epochs = num_epochs
         self.criterion = criterion
         self.optimizer = optim.Adam(model.parameters(), lr=learning_rate)
@@ -32,7 +32,7 @@ class ModelTrainer:
         correct = 0
         total = 0
 
-        pbar = tqdm(self.train_dataloader, desc=f'Epoch {epoch+1}/{self.num_epochs}')
+        pbar = tqdm(self.train_data_loader, desc=f'Epoch {epoch+1}/{self.num_epochs}')
         for inputs, labels in pbar:
             inputs, labels = inputs.to(self.device), labels.to(self.device)
             
@@ -54,7 +54,7 @@ class ModelTrainer:
             })
 
         # Calculate final metrics for the epoch
-        avg_loss = epoch_loss / len(self.train_dataloader)
+        avg_loss = epoch_loss / len(self.train_data_loader)
         accuracy = correct / total
         
         return avg_loss, accuracy
@@ -66,7 +66,7 @@ class ModelTrainer:
         total = 0
 
         with torch.no_grad():
-            for inputs, labels in self.val_dataloader:
+            for inputs, labels in self.val_data_loader:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, labels)
@@ -77,12 +77,22 @@ class ModelTrainer:
                 correct += predicted.eq(labels).sum().item()
 
         # Calculate final validation metrics
-        avg_val_loss = val_loss / len(self.val_dataloader)
+        avg_val_loss = val_loss / len(self.val_data_loader)
         val_accuracy = correct / total
         
         return avg_val_loss, val_accuracy
 
-    def train(self, save_path: Path):
+    def _save_model(self, epoch: int, save_path: Path) -> None:
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': self.model.state_dict(),
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'train_acc': self.train_acc,
+            'val_acc': self.val_acc,
+        }, save_path})
+        logger.info(f'Model saved.\nTrain accuracy: {self.train_acc:.4f}\nValidation accuracy: {self.val_acc:.4f}')
+    
+    def train(self) -> None:
         best_val_acc = 0.0
         
         for epoch in range(self.num_epochs):
@@ -97,19 +107,15 @@ class ModelTrainer:
 
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
-                torch.save({
-                    'epoch': epoch,
-                    'model_state_dict': self.model.state_dict(),
-                    'optimizer_state_dict': self.optimizer.state_dict(),
-                    'val_acc': val_acc,
-                }, f"{ArtefactsConfig.artefacts_path}")
-                logger.info(f'Model saved with validation accuracy: {val_acc:.4f}')
-            
+                self._save_model(epoch)
+                
             if self.device == 'cuda':
                 torch.cuda.empty_cache()
 
-    def load_model(self, model_path: Path):
+    def load_model(self, model_path: Path) -> None:
         checkpoint = torch.load(model_path)
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        return checkpoint['epoch'], checkpoint['val_acc']
+        self.train_acc = checkpoint['train_acc']
+        self.val_acc = checkpoint['val_acc']
+        logger.info(f'Model loaded.\nTrain accuracy: {self.train_acc:.4f}\nValidation accuracy: {self.val_acc:.4f}')

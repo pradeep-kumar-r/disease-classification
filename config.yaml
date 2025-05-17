@@ -1,6 +1,9 @@
 data_folder_path: data/
 dataset_path: data/data.csv
 images_folder_path: data/images/
+train_data_folder_path: data/train/
+val_data_folder_path: data/val/
+test_data_folder_path: data/test/
 artefacts_folder_path: artefacts/
 train_split: 0.7
 val_split: 0.1
