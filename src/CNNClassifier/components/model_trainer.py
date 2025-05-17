@@ -89,7 +89,7 @@ class ModelTrainer:
             'optimizer_state_dict': self.optimizer.state_dict(),
             'train_acc': self.train_acc,
             'val_acc': self.val_acc,
-        }, save_path})
+        }, save_path)
         logger.info(f'Model saved.\nTrain accuracy: {self.train_acc:.4f}\nValidation accuracy: {self.val_acc:.4f}')
     
     def train(self) -> None:
