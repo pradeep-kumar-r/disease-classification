@@ -143,3 +143,12 @@ def move_copy_file(old_path: Path, new_directory: Path, mode: Literal["move", "c
     except Exception as e:
         logger.error(f"Error moving and renaming file: {e}")
         raise e
+    
+def has_files(directory: Path, extension: str, mode: Literal["any", "all"] = "any") -> bool:
+    if not directory.exists():
+        logger.error(f"Directory not found at {directory}")
+        raise FileNotFoundError(f"Directory not found at {directory}")
+    if mode == "any":
+        return any(file.suffix == extension for file in directory.glob('*'))
+    elif mode == "all":
+        return all(file.suffix == extension for file in directory.glob('*'))

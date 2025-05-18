@@ -1,69 +1,39 @@
-import torch
-from torch.utils.data import DataLoader
 from typing import Optional
-from pathlib import Path
-import pandas as pd
-from CNNClassifier.components.dataset import ImageDataset
+from torch.utils.data import DataLoader
+from CNNClassifier.components.image_dataset import ImageDataset
 from CNNClassifier.logger import logger
 
 
-class DatasetLoader:
-    def __init__(self, 
-                 dataset_path: Path,
-                 shuffle: bool = False,
-                 name: str = "",
+class DatasetLoader():
+    def __init__(self,
+                 dataset: ImageDataset,
+                 shuffle: Optional[bool] = None,
                  batch_size: Optional[int] = None,
-                 num_workers: Optional[int] = 4):
-        self.dataset_path = dataset_path
-        if name == "train":
+                 num_workers: Optional[int] = None):
+        self.dataset = dataset
+        if dataset.dataset_type == "train":
             self.batch_size = batch_size
+            self.shuffle = True if shuffle is None else shuffle
         else:
-            bs = pd.read_csv(str(self.dataset_path)).shape[0]
-            self.batch_size = bs
-        self.shuffle = shuffle
-        self.name = name
-        self.num_workers = num_workers
-        if self.dataset_path.suffix == ".pt":
-            self._load_dataset(self.dataset_path)
-        else:
-            self._create_dataset()
-            self._save_dataset()
+            self.batch_size = dataset.__len__()
+            self.shuffle = False if shuffle is None else shuffle
+        self.num_workers = 4 if num_workers is None else num_workers
+        self.dataloader = self._create_dataloader()
     
-    def _create_dataset(self) -> None:
+    def _create_dataloader(self) -> None:
         try:
-            self.dataset = ImageDataset(data_path = self.dataset_path,
-                                        images_path = self.dataset_path.parent / "images")
-            self.data_loader = DataLoader(
+            dataloader = DataLoader(
                 dataset=self.dataset,
                 batch_size=self.batch_size,
                 shuffle=self.shuffle,
                 num_workers=self.num_workers
             )
-            
-            logger.info(f"Created data loaders for {self.dataset_path.stem} dataset")
+            logger.info(f"Successfully created dataloader"
+                        f"for {self.dataset.dataset_type} dataset"
+                        f"with {self.dataset.__len__()} samples and {self.dataset.num_classes()} classes"
+                        f"with {self.batch_size} batch size"
+                        f"and {self.num_workers} num workers")
+            return dataloader
         except Exception as e:
-            logger.error(f"Error creating data loader for {self.dataset_path.stem} dataset: {e}")
-            raise e
-            
-    def _save_dataset(self) -> None:
-        try:
-            save_path = self.dataset_path.parent / f"{self.dataset_path.stem}.pt"
-            torch.save(self.data_loader.dataset, save_path)
-            logger.info(f"Dataset saved to {save_path}")
-        except Exception as e:
-            logger.error(f"Error saving dataset to {save_path}: {e}")
-            raise e
-        
-    def _load_dataset(self, dataset_path: Path) -> None:
-        try:
-            dataset = torch.load(dataset_path)
-            self.data_loader = DataLoader(
-                dataset=dataset,
-                batch_size=self.batch_size,
-                shuffle=self.shuffle,
-                num_workers=self.num_workers
-            )
-            logger.info("Successfully loaded dataset & created data loader")
-        except Exception as e:
-            logger.error(f"Error loading dataset & creating data loader: {e}")
+            logger.error(f"Error created dataloader: {e}")
             raise e

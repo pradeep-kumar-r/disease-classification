@@ -77,9 +77,15 @@ class DataDownloader:
             val_df = df[train_size:train_size + val_size]
             test_df = df[train_size + val_size:]
             
-            create_directories([self.data_downloader_config.train_data_folder_path,
-                                self.data_downloader_config.val_data_folder_path,
-                                self.data_downloader_config.test_data_folder_path])
+            ### Can be commented out for actual run
+            directories = [self.data_downloader_config.train_data_folder_path,
+                            self.data_downloader_config.val_data_folder_path,
+                            self.data_downloader_config.test_data_folder_path]
+            for dir in directories:
+                if dir.exists():
+                    shutil.rmtree(dir)
+            
+            create_directories(directories)
             
             train_df.to_csv(str(self.data_downloader_config.train_data_folder_path / "train_data.csv"), index=False)
             self._copy_files(train_df, self.data_downloader_config.train_data_folder_path / "images")

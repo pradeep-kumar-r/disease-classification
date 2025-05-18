@@ -49,6 +49,9 @@ class ModelTrainingConfig:
 class TrainingPipelineConfig:
     model_training_config: ModelTrainingConfig = ModelTrainingConfig()
     artefacts_config: ArtefactsConfig = ArtefactsConfig()
+    train_dataset_path: Path = Path(config['train_data_folder_path']) / "train_data.pt"
+    val_dataset_path: Path = Path(config['val_data_folder_path']) / "val_data.pt"
+    test_dataset_path: Path = Path(config['test_data_folder_path']) / "test_data.pt"
     
     
 

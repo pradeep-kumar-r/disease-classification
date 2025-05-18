@@ -1,20 +1,10 @@
-from abc import ABC, abstractmethod
 import torch.nn as nn
 import torch
 
-class NNModel(ABC, nn.Module):
-    @abstractmethod
+
+class BasicCNNModel(nn.Module):
     def __init__(self, num_classes: int):
-        pass
-
-    @abstractmethod
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        pass
-
-
-class BasicCNNModel(NNModel):
-    def __init__(self, num_classes: int):
-        super(BasicCNNModel, self).__init__()
+        super().__init__()
         self.num_classes = num_classes
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
         self.relu1 = nn.ReLU()
