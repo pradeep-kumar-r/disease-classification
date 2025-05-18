@@ -11,12 +11,9 @@ def main() -> None:
     logger.info("\n\nStep 1: Data Pipeline")
     data_pipeline = DataPipeline(DataPipelineConfig)
     data_pipeline.run_pipeline()
-    num_classes = data_pipeline.train_dataset.num_classes()
-
+    
     logger.info("\n\nStep 2: Training Pipeline")
-    training_pipeline = TrainingPipeline(model=BasicCNNModel(num_classes=num_classes),
-                                         training_pipeline_config=TrainingPipelineConfig()
-                        )
+    training_pipeline = TrainingPipeline(TrainingPipelineConfig)
     training_pipeline.run_pipeline()
 
 

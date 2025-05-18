@@ -2,7 +2,6 @@ import torch
 from pathlib import Path
 from typing import Literal
 from CNNClassifier.logger import logger
-from CNNClassifier.components.dataset_loader import DatasetFactory
 
 
 class ModelEvaluator:

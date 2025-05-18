@@ -4,26 +4,33 @@ from CNNClassifier.components.dataset_loader import DatasetLoader
 from CNNClassifier.components.image_dataset import ImageDataset
 from CNNClassifier.config import TrainingPipelineConfig
 from CNNClassifier.logger import logger
+from CNNClassifier.components.model import BasicCNNModel
 
 
 class TrainingPipeline:
     def __init__(self,
-                 model: nn.Module,
                  training_pipeline_config: TrainingPipelineConfig):
         
         self.training_pipeline_config: TrainingPipelineConfig = training_pipeline_config
-        self.model: nn.Module = model
         self.train_dataloader: DatasetLoader = None
         self.val_dataloader: DatasetLoader = None
         self.test_dataloader: DatasetLoader = None
         self.model_trainer: ModelTrainer = None
+        self.model: nn.Module = None
+        self.num_classes: int = None
+    
+    def _set_model(self) -> None:
+        self.model = BasicCNNModel(num_classes=self.num_classes)
     
     def _create_dataloaders(self) -> None:
-        self.train_dataloader = DatasetLoader(ImageDataset.load_dataset(self.training_pipeline_config.train_dataset_path), 
+        train_dataset = ImageDataset.load_dataset(self.training_pipeline_config.train_dataset_path)
+        self.num_classes = train_dataset.num_classes()
+        val_dataset = ImageDataset.load_dataset(self.training_pipeline_config.val_dataset_path)
+        test_dataset = ImageDataset.load_dataset(self.training_pipeline_config.test_dataset_path)
+        self.train_dataloader = DatasetLoader(dataset=train_dataset,
                                               batch_size=self.training_pipeline_config.model_training_config.batch_size)
-        self.val_dataloader = DatasetLoader(ImageDataset.load_dataset(self.training_pipeline_config.val_dataset_path))
-        self.test_dataloader = DatasetLoader(ImageDataset.load_dataset(self.training_pipeline_config.test_dataset_path))
-        
+        self.val_dataloader = DatasetLoader(dataset=val_dataset)
+        self.test_dataloader = DatasetLoader(dataset=test_dataset)
     
     def _train(self) -> None:
         logger.info("Starting Training Pipeline")
@@ -38,6 +45,7 @@ class TrainingPipeline:
     
     def run_pipeline(self) -> None:
         self._create_dataloaders()
+        self._set_model()
         self.model_trainer = ModelTrainer(
             model=self.model,
             train_dataloader=self.train_dataloader,

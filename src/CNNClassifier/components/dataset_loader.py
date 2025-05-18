@@ -20,6 +20,12 @@ class DatasetLoader():
         self.num_workers = 4 if num_workers is None else num_workers
         self.dataloader = self._create_dataloader()
     
+    def __len__(self):
+        return len(self.dataloader)
+    
+    def __iter__(self):
+        return iter(self.dataloader)
+    
     def _create_dataloader(self) -> None:
         try:
             dataloader = DataLoader(

@@ -43,6 +43,7 @@ class ArtefactsConfig:
 class ModelTrainingConfig:
     num_epochs: int = config['num_epochs']
     learning_rate: float = config['learning_rate']
+    batch_size: int = config['batch_size']
     
     
 @dataclass(frozen=True)
