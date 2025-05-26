@@ -17,7 +17,9 @@ class TrainingPipeline:
         self.val_dataloader: DatasetLoader = None
         self.test_dataloader: DatasetLoader = None
         self.model_trainer: ModelTrainer = None
-        self.model_evaluator: ModelEvaluator = None
+        self.train_evaluator: ModelEvaluator = None
+        self.val_evaluator: ModelEvaluator = None
+        self.test_evaluator: ModelEvaluator = None
         self.model: nn.Module = None
         self.num_classes: int = None
     
@@ -46,13 +48,16 @@ class TrainingPipeline:
         
     def _evaluate(self) -> None:
         logger.info("Starting Evaluation")
-        try:
-            self.model_evaluator.evaluate()
-            self.model_evaluator.save_report()
-            logger.info("Evaluation completed successfully")
-        except Exception as e:
-            logger.error(f"Evaluation failed: {str(e)}")
-            raise e
+        for evaluator, dataset_type in [(self.train_evaluator, "Train"), 
+                                        (self.val_evaluator, "Validation"), 
+                                        (self.test_evaluator, "Test")]:
+            try:
+                evaluator.evaluate()
+                evaluator.save_report()
+                logger.info(f"Evaluation completed successfully for {dataset_type}")
+            except Exception as e:
+                logger.error(f"Evaluation failed for {dataset_type}: {str(e)}")
+                raise e
     
     def run_pipeline(self) -> None:
         self._create_dataloaders()
@@ -66,9 +71,19 @@ class TrainingPipeline:
             model_save_path=self.training_pipeline_config.artefacts_config.artefacts_path
         )
         self._train()
-        self.model_evaluator = ModelEvaluator(
+        self.train_evaluator = ModelEvaluator(
             model=self.model,
-            test_dataloader=self.test_dataloader,
-            report_save_path=self.training_pipeline_config.artefacts_config.artefacts_path / "evaluation_report.txt"
+            dataloader=self.train_dataloader,
+            report_save_path=self.training_pipeline_config.artefacts_config.artefacts_path / "train_evaluation_report.txt"
+        )
+        self.val_evaluator = ModelEvaluator(
+            model=self.model,
+            dataloader=self.val_dataloader,
+            report_save_path=self.training_pipeline_config.artefacts_config.artefacts_path / "val_evaluation_report.txt"
+        )
+        self.test_evaluator = ModelEvaluator(
+            model=self.model,
+            dataloader=self.test_dataloader,
+            report_save_path=self.training_pipeline_config.artefacts_config.artefacts_path / "test_evaluation_report.txt"
         )
         self._evaluate()

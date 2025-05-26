@@ -11,14 +11,14 @@ from CNNClassifier.components.dataset_loader import DatasetLoader
 class ModelEvaluator:
     def __init__(self, 
                  model: nn.Module,
-                 test_dataloader: DatasetLoader, 
+                 dataloader: DatasetLoader, 
                  criterion: nn.Module=nn.CrossEntropyLoss(),
                  report_save_path: Optional[Path] = None,
                  device: Literal["cuda", "cpu"]='cuda' if torch.cuda.is_available() else 'cpu'):
         self.device = device
         self.model = model
         self.model.to(self.device)
-        self.test_dataloader = test_dataloader
+        self.dataloader = dataloader
         self.criterion = criterion
         self.report_save_path = report_save_path
         self.confusion_matrix = None
@@ -33,7 +33,7 @@ class ModelEvaluator:
         if not self.is_evaluated:
             self.model.eval()
             with torch.no_grad():
-                for input_data, label in self.test_dataloader:
+                for input_data, label in self.dataloader:
                     input_data, label = input_data.to(self.device), label.to(self.device)
                     self.labels = np.append(self.labels, label.numpy())
                     probabilities = self.model(input_data)
@@ -53,7 +53,7 @@ class ModelEvaluator:
         
     def save_report(self):
         if self.report_save_path:
-            with open(self.report_save_path, 'w') as f:
+            with open(self.report_save_path, 'w', encoding='utf-8') as f:
                 f.write("Evaluation Report:\n\n\n")
                 f.write(f"Accuracy: {self.accuracy:.4f}\n\n\n")
                 f.write(f"Confusion Matrix: \n{self.confusion_matrix}\n\n\n")
