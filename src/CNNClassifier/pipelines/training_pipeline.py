@@ -5,6 +5,7 @@ from CNNClassifier.components.image_dataset import ImageDataset
 from CNNClassifier.config import TrainingPipelineConfig
 from CNNClassifier.logger import logger
 from CNNClassifier.components.model import BasicCNNModel
+from CNNClassifier.components.model_evaluator import ModelEvaluator
 
 
 class TrainingPipeline:
@@ -16,6 +17,7 @@ class TrainingPipeline:
         self.val_dataloader: DatasetLoader = None
         self.test_dataloader: DatasetLoader = None
         self.model_trainer: ModelTrainer = None
+        self.model_evaluator: ModelEvaluator = None
         self.model: nn.Module = None
         self.num_classes: int = None
     
@@ -34,13 +36,22 @@ class TrainingPipeline:
     
     def _train(self) -> None:
         logger.info("Starting Training Pipeline")
-        
         try:
             self.model_trainer.train()
             logger.info(f"{self.model_trainer}")
             logger.info("Training Pipeline completed successfully")
         except Exception as e:
             logger.error(f"Training Pipeline failed: {str(e)}")
+            raise e
+        
+    def _evaluate(self) -> None:
+        logger.info("Starting Evaluation")
+        try:
+            self.model_evaluator.evaluate()
+            self.model_evaluator.save_report()
+            logger.info("Evaluation completed successfully")
+        except Exception as e:
+            logger.error(f"Evaluation failed: {str(e)}")
             raise e
     
     def run_pipeline(self) -> None:
@@ -55,3 +66,9 @@ class TrainingPipeline:
             model_save_path=self.training_pipeline_config.artefacts_config.artefacts_path
         )
         self._train()
+        self.model_evaluator = ModelEvaluator(
+            model=self.model,
+            test_dataloader=self.test_dataloader,
+            report_save_path=self.training_pipeline_config.artefacts_config.artefacts_path / "evaluation_report.txt"
+        )
+        self._evaluate()
