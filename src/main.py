@@ -1,5 +1,4 @@
 from CNNClassifier.logger import logger
-from CNNClassifier.components.model import BasicCNNModel
 from CNNClassifier.pipelines.data_pipeline import DataPipeline
 from CNNClassifier.pipelines.training_pipeline import TrainingPipeline
 from CNNClassifier.config import DataPipelineConfig, TrainingPipelineConfig

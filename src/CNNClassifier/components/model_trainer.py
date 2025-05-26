@@ -54,7 +54,6 @@ class ModelTrainer:
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
             
-            # Update progress bar with current batch metrics
             pbar.set_postfix({
                 'Loss': epoch_loss/total,
                 'Accuracy': 100.*correct/total

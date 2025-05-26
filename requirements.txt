@@ -1,6 +1,5 @@
 torch
 torchvision
-python-box==6.0.2
 numpy
 pandas
 matplotlib
@@ -12,7 +11,7 @@ joblib
 scipy
 fastapi
 pydantic
-scipy
+mlflow
 kaggle
 kagglehub
 python-dotenv

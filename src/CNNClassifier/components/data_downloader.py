@@ -9,29 +9,15 @@ from CNNClassifier.utils import rename_file, rename_folder, move_copy_file, crea
 
 
 class DataDownloader:
-    _instance = None
-    
-    def __new__(cls, data_downloader_config: DataDownloaderConfig | None = None):
-        if cls._instance is None:
-            if data_downloader_config is None:
-                raise ValueError("DataDownloaderConfig is required for first initialization")
-            cls._instance = super(DataDownloader, cls).__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
-    
-    def __init__(self, data_downloader_config: DataDownloaderConfig | None= None):
-        if self._initialized:
-            logger.error("Singleton class already initialized")
-            return
-            
+    def __init__(self, data_downloader_config: DataDownloaderConfig):
         if data_downloader_config is None:
             logger.error("DataDownloaderConfig is required for first initialization")
             raise ValueError("DataDownloaderConfig is required for first initialization")
             
         ### Can be commented out for actual run
-        if data_downloader_config.data_folder_path.exists():
-            shutil.rmtree(data_downloader_config.data_folder_path)
-            os.makedirs(data_downloader_config.data_folder_path, exist_ok=True)
+        # if data_downloader_config.data_folder_path.exists():
+        #     shutil.rmtree(data_downloader_config.data_folder_path)
+        #     os.makedirs(data_downloader_config.data_folder_path, exist_ok=True)
         
         self.data_downloader_config = data_downloader_config
         os.makedirs(self.data_downloader_config.data_folder_path, exist_ok=True)

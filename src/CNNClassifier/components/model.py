@@ -15,9 +15,11 @@ class BasicCNNModel(nn.Module):
         self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.relu3 = nn.ReLU()
         self.maxpool3 = nn.MaxPool2d(kernel_size=2, stride=2)
-        self.fc1 = nn.Linear(64 * 7 * 7, 128)
+        self.fc1 = nn.Linear(64 * 28 * 28, 128)
         self.relu4 = nn.ReLU()
-        self.fc2 = nn.Linear(128, num_classes)
+        self.fc2 = nn.Linear(128, 32)
+        self.relu5 = nn.ReLU()
+        self.fc3 = nn.Linear(32, num_classes)
         self.softmax = nn.Softmax(dim=1)
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -30,10 +32,12 @@ class BasicCNNModel(nn.Module):
         x = self.conv3(x)
         x = self.relu3(x)
         x = self.maxpool3(x)
-        x = x.view(x.size(0), -1)  # Flatten the tensor
+        x = x.view(x.size(0), -1)
         x = self.fc1(x)
         x = self.relu4(x)
         x = self.fc2(x)
+        x = self.relu5(x)
+        x = self.fc3(x)
         x = self.softmax(x)
         return x
     

@@ -131,9 +131,9 @@ def move_copy_file(old_path: Path, new_directory: Path, mode: Literal["move", "c
             logger.error(f"File not found at {old_path}")
             raise FileNotFoundError(f"File not found at {old_path}")
         new_directory.mkdir(parents=True, exist_ok=True)
-        extension = old_path.suffix
+        # extension = old_path.suffix
         old_name = old_path.name
-        new_path = new_directory / f"{old_name}{extension}"
+        new_path = new_directory / f"{old_name}"
         if mode == "move":
             shutil.move(str(old_path), str(new_path))
             logger.info(f"Moved file from {old_path} to {new_path}")
