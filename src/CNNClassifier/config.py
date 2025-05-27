@@ -5,6 +5,62 @@ from dotenv import load_dotenv
 from CNNClassifier.utils import read_yaml
 
 
+@dataclass(frozen=True)
+class DataDownloaderConfig:
+    kaggle_dataset_path: Path
+    data_folder_path: Path
+    kaggle_user: str
+    kaggle_key: str
+    train_data_folder_path: Path
+    val_data_folder_path: Path
+    test_data_folder_path: Path
+    train_split: float
+    val_split: float
+
+
+@dataclass(frozen=True)
+class DataPipelineConfig:
+    data_downloader_config: DataDownloaderConfig
+    data_folder_path: Path
+    images_path: Path
+    batch_size: int
+    dataset_path: Path
+    train_data_folder_path: Path
+    val_data_folder_path: Path
+    test_data_folder_path: Path
+
+    
+@dataclass(frozen=True)
+class ArtefactsConfig:
+    artefacts_path: Path
+
+
+@dataclass(frozen=True)
+class ModelTrainingConfig:
+    num_epochs: int
+    learning_rate: float
+    batch_size: int
+    
+    
+@dataclass(frozen=True)
+class TrainingPipelineConfig:
+    model_training_config: ModelTrainingConfig
+    artefacts_config: ArtefactsConfig
+    train_dataset_path: Path
+    val_dataset_path: Path
+    test_dataset_path: Path
+
+
+@dataclass(frozen=True)
+class Config:
+    data_downloader_config: DataDownloaderConfig
+    data_pipeline_config: DataPipelineConfig
+    artefacts_config: ArtefactsConfig
+    model_training_config: ModelTrainingConfig
+    training_pipeline_config: TrainingPipelineConfig
+
+
+# Singleton config manager
 class ConfigManager:
     _instance = None
     
@@ -12,63 +68,63 @@ class ConfigManager:
         if cls._instance is None:
             cls._instance = super(ConfigManager, cls).__new__(cls)
             load_dotenv()
-            cls.config = read_yaml(Path("config.yaml"))
+            cls.config_yaml = read_yaml(Path("config.yaml"))
+            cls._set_config()
         return cls._instance
     
-    def get_config(self):
-        return self.config
+    @classmethod
+    def _set_config(cls):
+        data_downloader_config = DataDownloaderConfig(
+            kaggle_dataset_path=Path(cls.config_yaml['kaggle_dataset_path']),
+            data_folder_path=Path(cls.config_yaml['data_folder_path']),
+            kaggle_user=os.getenv("KAGGLE_USER"),
+            kaggle_key=os.getenv("KAGGLE_KEY"),
+            train_data_folder_path=Path(cls.config_yaml['train_data_folder_path']),
+            val_data_folder_path=Path(cls.config_yaml['val_data_folder_path']),
+            test_data_folder_path=Path(cls.config_yaml['test_data_folder_path']),
+            train_split=cls.config_yaml['train_split'],
+            val_split=cls.config_yaml['val_split']
+        )
+        data_pipeline_config = DataPipelineConfig(
+            data_downloader_config=data_downloader_config,
+            data_folder_path=Path(cls.config_yaml['data_folder_path']),
+            images_path=Path(cls.config_yaml['images_folder_path']),
+            batch_size=cls.config_yaml['batch_size'],
+            dataset_path=Path(cls.config_yaml['dataset_path']),
+            train_data_folder_path=Path(cls.config_yaml['train_data_folder_path']),
+            val_data_folder_path=Path(cls.config_yaml['val_data_folder_path']),
+            test_data_folder_path=Path(cls.config_yaml['test_data_folder_path'])
+        )
+        artefacts_config = ArtefactsConfig(
+            artefacts_path=Path(cls.config_yaml['artefacts_folder_path'])
+        )
+        model_training_config = ModelTrainingConfig(
+            num_epochs=cls.config_yaml['num_epochs'],
+            learning_rate=cls.config_yaml['learning_rate'],
+            batch_size=cls.config_yaml['batch_size']
+        )
+        training_pipeline_config = TrainingPipelineConfig(
+            model_training_config=model_training_config,
+            artefacts_config=artefacts_config,
+            train_dataset_path=Path(cls.config_yaml['train_data_folder_path']) / "train_data.pt",
+            val_dataset_path=Path(cls.config_yaml['val_data_folder_path']) / "val_data.pt",
+            test_dataset_path=Path(cls.config_yaml['test_data_folder_path']) / "test_data.pt"
+        )
+        cls.config = Config(
+            data_downloader_config=data_downloader_config,
+            data_pipeline_config=data_pipeline_config,
+            artefacts_config=artefacts_config,
+            model_training_config=model_training_config,
+            training_pipeline_config=training_pipeline_config
+        )
     
-
-config_manager = ConfigManager()
-
-
-@dataclass(frozen=True)
-class DataDownloaderConfig:
-    kaggle_dataset_path: Path = Path(config_manager.get_config()['kaggle_dataset_path'])
-    data_folder_path: Path = Path(config_manager.get_config()['data_folder_path'])
-    kaggle_user: str = os.getenv("KAGGLE_USER")
-    kaggle_key: str = os.getenv("KAGGLE_KEY")
-    train_data_folder_path: Path = Path(config_manager.get_config()['train_data_folder_path'])
-    val_data_folder_path: Path = Path(config_manager.get_config()['val_data_folder_path'])
-    test_data_folder_path: Path = Path(config_manager.get_config()['test_data_folder_path'])
-    train_split: float = config_manager.get_config()['train_split']
-    val_split: float = config_manager.get_config()['val_split']
-    
-
-@dataclass(frozen=True)
-class DataPipelineConfig:
-    data_downloader_config: DataDownloaderConfig = DataDownloaderConfig()
-    data_folder_path: Path = Path(config_manager.get_config()['data_folder_path'])
-    images_path: Path = Path(config_manager.get_config()['images_folder_path'])
-    batch_size: int = config_manager.get_config()['batch_size']
-    dataset_path: Path = Path(config_manager.get_config()['dataset_path'])
-    train_data_folder_path: Path = Path(config_manager.get_config()['train_data_folder_path'])
-    val_data_folder_path: Path = Path(config_manager.get_config()['val_data_folder_path'])
-    test_data_folder_path: Path = Path(config_manager.get_config()['test_data_folder_path'])
-
-    
-@dataclass(frozen=True)
-class ArtefactsConfig:
-    artefacts_path: Path = Path(config_manager.get_config()['artefacts_folder_path'])
-
-
-@dataclass(frozen=True)
-class ModelTrainingConfig:
-    num_epochs: int = config_manager.get_config()['num_epochs']
-    learning_rate: float = config_manager.get_config()['learning_rate']
-    batch_size: int = config_manager.get_config()['batch_size']
-    
-    
-@dataclass(frozen=True)
-class TrainingPipelineConfig:
-    model_training_config: ModelTrainingConfig = ModelTrainingConfig()
-    artefacts_config: ArtefactsConfig = ArtefactsConfig()
-    train_dataset_path: Path = Path(config_manager.get_config()['train_data_folder_path']) / "train_data.pt"
-    val_dataset_path: Path = Path(config_manager.get_config()['val_data_folder_path']) / "val_data.pt"
-    test_dataset_path: Path = Path(config_manager.get_config()['test_data_folder_path']) / "test_data.pt"
-    
+    @classmethod
+    def get_config(cls):
+        return cls.config
     
 
 # Testing configs
 if __name__ == "__main__":
-    print(DataDownloaderConfig().data_folder_path)
+    config_manager = ConfigManager()
+    print(config_manager.get_config())
+    

@@ -69,7 +69,7 @@ class ImageDataset(Dataset):
     def export_dataset(self, save_path: Path) -> None:
         try:
             metadata = {
-                'data': self.data,  # List of (image_name, label) tuples
+                'data': self.data,
                 'data_path': self.data_path,
                 'images_path': self.images_path,
                 'transform': self.transform,

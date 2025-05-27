@@ -87,12 +87,28 @@ class ModelTrainer:
         return avg_val_loss, val_accuracy
 
     def _save_model(self, epoch: int) -> None:
+        train_data_metadata = {
+                'data_path': self.train_dataloader.dataset.data_path,
+                'images_path': self.train_dataloader.dataset.images_path,
+                'transform': self.train_dataloader.dataset.transform,
+                'class_to_idx': self.train_dataloader.dataset.class_to_idx,
+                'dataset_type': self.train_dataloader.dataset.dataset_type
+            }
+        val_data_metadata = {
+                'data_path': self.val_dataloader.dataset.data_path,
+                'images_path': self.val_dataloader.dataset.images_path,
+                'transform': self.val_dataloader.dataset.transform,
+                'class_to_idx': self.val_dataloader.dataset.class_to_idx,
+                'dataset_type': self.val_dataloader.dataset.dataset_type
+            }
         torch.save({
             'epoch': epoch,
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
             'train_acc': self.train_acc,
             'val_acc': self.val_acc,
+            'train_data_metadata': train_data_metadata,
+            'val_data_metadata': val_data_metadata
         }, self.model_save_path)
         logger.info(f'Model saved.\nTrain accuracy: {self.train_acc:.4f}\nValidation accuracy: {self.val_acc:.4f}')
     
