@@ -34,7 +34,7 @@ app.add_middleware(
 )
 
 inferencer = ModelInferencer(
-    model_path=config.training_pipeline_config.artefacts_config.artefacts_path,
+    model_path=config.training_pipeline_config.artefacts_config.artefacts_path / "model_metadata.pth",
     device='cpu'
 )
 

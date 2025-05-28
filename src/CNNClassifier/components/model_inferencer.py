@@ -21,7 +21,10 @@ class ModelInferencer:
         
     def _load_model(self) -> None:
         try:
-            checkpoint = torch.load(self.model_path, map_location=self.device, weights_only=False)
+            checkpoint = torch.load(self.model_path, 
+                                    map_location=self.device, 
+                                    weights_only=False
+                                    )
             num_classes = checkpoint['train_data_metadata']['num_classes']
             self.model = BasicCNNModel(num_classes=num_classes)
             self.model.load_state_dict(checkpoint['model_state_dict'])
