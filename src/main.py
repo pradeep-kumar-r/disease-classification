@@ -4,7 +4,6 @@ from CNNClassifier.pipelines.training_pipeline import TrainingPipeline
 from CNNClassifier.config import ConfigManager
 
 
-
 def main() -> None:
     logger.info("\n\n*****\nNEW RUN\n*****")
     

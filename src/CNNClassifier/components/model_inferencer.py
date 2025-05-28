@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Literal
 import torch
 import torch.nn as nn
-from PIL import Image
+from PIL.Image import ImageFile
 from torchvision import transforms
 from CNNClassifier.logger import logger
 from CNNClassifier.components.model import BasicCNNModel
@@ -34,9 +34,9 @@ class ModelInferencer:
             logger.error(f"Model loading failed: {str(e)}")
             raise
 
-    def _preprocess_image(self, image_path: Path) -> torch.Tensor:
+    def _preprocess_image(self, input_image: ImageFile) -> torch.Tensor:
         try:
-            image = Image.open(image_path).convert('RGB')
+            image = input_image.convert('RGB')
             transform = transforms.Compose([
                 transforms.Resize((224, 224)),
                 transforms.ToTensor(),
@@ -45,7 +45,6 @@ class ModelInferencer:
                     std=[0.229, 0.224, 0.225]
                 )
             ])
-            
             image_tensor = transform(image)
             image_tensor = image_tensor.unsqueeze(0)
             return image_tensor.to(self.device)
@@ -53,11 +52,11 @@ class ModelInferencer:
             logger.error(f"Error preprocessing image: {str(e)}")
             raise
 
-    def predict(self, image_path: Path) -> Tuple[str, float]:
+    def predict(self, input_image: ImageFile) -> Tuple[str, float]:
         try:
             if not self.model:
                 raise ValueError("Model not loaded. Please load the model first.")
-            input_tensor = self._preprocess_image(image_path)
+            input_tensor = self._preprocess_image(input_image)
             with torch.no_grad():
                 probabilities = self.model(input_tensor)
                 predicted_class = torch.argmax(probabilities, dim=1).item()
