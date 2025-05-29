@@ -1,4 +1,3 @@
-import io
 import os
 import requests
 import streamlit as st
@@ -39,7 +38,7 @@ def display_prediction(img, predictions):
     max_disease = max(predictions, key=predictions.get)
     st.success(f"Most likely: **{max_disease}** ({predictions[max_disease]:.1%} probability)")
 
-tab1, tab2 = st.tabs(["Single Image", "Bulk Analysis"])
+tab1 = st.tabs(["Single Image"])
 
 with tab1:
     uploaded_file = st.file_uploader(
@@ -77,57 +76,6 @@ with tab1:
                     st.error(f"Network error: {str(e)}")
                 except Exception as e:
                     st.error(f"Unexpected error: {str(e)}")
-
-with tab2:
-    st.markdown("### Bulk Image Analysis")
-    uploaded_files = st.file_uploader(
-        "Select multiple JPG images",
-        type=["jpg", "jpeg"],
-        accept_multiple_files=True,
-        key="bulk"
-    )
-
-    if uploaded_files:
-        if st.button("Analyze All Images", key="bulk_btn"):
-            try:
-                with st.spinner(f"Processing {len(uploaded_files)} images..."):
-                    files = [("files", file) for file in uploaded_files]
-                    response = requests.post(
-                        f"{API_URL}/predict_bulk",
-                        files=files,
-                        timeout=60
-                    )
-
-                if response.status_code == 200:
-                    results = response.json()
-                    st.subheader("Bulk Analysis Report")
-
-                    summary_data = []
-                    for result in results:
-                        if result["predictions"]:
-                            max_disease = max(result["predictions"], key=result["predictions"].get)
-                            summary_data.append({
-                                "Filename": result["filename"],
-                                "Primary Diagnosis": max_disease,
-                                "Confidence": f"{result['predictions'][max_disease]:.1%}"
-                            })
-
-                    if summary_data:
-                        st.dataframe(pd.DataFrame(summary_data), use_container_width=True)
-
-                    st.markdown("### Detailed Results")
-                    for result in results:
-                        with st.expander(f"{result['filename']}"):
-                            if result["predictions"]:
-                                img_bytes = next(f[1].getvalue() for f in files if f[0] == result['filename'])
-                                image = Image.open(io.BytesIO(img_bytes))
-                                display_prediction(image, result["predictions"])
-                            else:
-                                st.error(f"Error: {result['error']}")
-            except requests.exceptions.RequestException as e:
-                st.error(f"Network error: {str(e)}")
-            except Exception as e:
-                st.error(f"Unexpected error: {str(e)}")
 
 st.sidebar.markdown("## About")
 st.sidebar.info(
