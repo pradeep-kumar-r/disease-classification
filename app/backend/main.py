@@ -85,11 +85,15 @@ async def predict(file: UploadFile = File(..., description="Chicken fecal image 
     contents = await file.read()
     logger.info(f"File uploaded & read successfully: {file.filename}")
     try:
-        predictions = await inferencer.predict(contents)
-        logger.info(f"Prediction Successful for {file.filename}, prediction: {predictions}")
+        predicted_class, confidence, probabilities_dict = await inferencer.predict(contents)
+        logger.info(f"Prediction Successful for {file.filename}, predicted class: {predicted_class}, confidence: {confidence}")
         return {
-            "filename": file.filename, 
-            "predictions": predictions, 
+            "filename": file.filename,
+            "predictions": {
+                "label": predicted_class,
+                "confidence": confidence,
+                "probabilities": probabilities_dict
+            },
             "error": None
         }
     except Exception as e:
@@ -123,11 +127,15 @@ async def predict_bulk(
         contents = await file.read()
         logger.info(f"File uploaded & read successfully: {file.filename}")
         try:
-            predictions = await inferencer.predict(contents)
-            logger.info(f"Prediction Successful for {file.filename}, prediction: {predictions}")
+            predicted_class, confidence, probabilities_dict = await inferencer.predict(contents)
+            logger.info(f"Prediction Successful for {file.filename}, predicted class: {predicted_class}, confidence: {confidence}")
             results.append({
                 "filename": file.filename,
-                "predictions": predictions,
+                "predictions": {
+                    "label": predicted_class,
+                    "confidence": confidence,
+                    "probabilities": probabilities_dict
+                },
                 "error": None
             })
         except Exception as e:

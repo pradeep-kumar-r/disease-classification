@@ -4,9 +4,7 @@ import shutil
 from pathlib import Path
 from typing import Any, Dict, List, Literal
 import base64
-import joblib
 import yaml
-import cv2
 import matplotlib.pyplot as plt
 from CNNClassifier.logger import logger
 
@@ -82,22 +80,6 @@ def get_size(filepath: Path, unit: Literal["KB", "MB", "GB"] = "KB") -> float:
         case _:
             logger.error(f"Invalid unit: {unit}")
             raise ValueError(f"Invalid unit: {unit}")
-
-def decodeImage(imgstring, fileName):
-    imgdata = base64.b64decode(imgstring)
-    with open(fileName, 'wb') as file:
-        file.write(imgdata)
-
-def encodeImageIntoBase64(croppedImagePath):
-    with open(croppedImagePath, "rb") as file:
-        return base64.b64encode(file.read())
-
-def show_image(image_path: str) -> None:
-    image = cv2.imread(image_path)
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    plt.imshow(image_rgb)
-    plt.axis('off')
-    plt.show()
 
 def rename_file(old_path: Path, new_name: str) -> None:
     try:

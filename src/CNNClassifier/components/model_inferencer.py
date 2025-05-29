@@ -1,8 +1,10 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Literal
+from io import BytesIO
+from typing import Dict, List, Optional, Tuple, Literal, Union
 import torch
 import torch.nn as nn
-from PIL.Image import ImageFile
+import torch.nn.functional as F
+from PIL import Image
 from torchvision import transforms
 from CNNClassifier.logger import logger
 from CNNClassifier.components.model import BasicCNNModel
@@ -25,7 +27,7 @@ class ModelInferencer:
                                     map_location=self.device, 
                                     weights_only=False
                                     )
-            num_classes = checkpoint['train_data_metadata']['num_classes']
+            num_classes = len(checkpoint['train_data_metadata']['class_to_idx'].keys())
             self.model = BasicCNNModel(num_classes=num_classes)
             self.model.load_state_dict(checkpoint['model_state_dict'])
             self.model.to(self.device)
@@ -37,7 +39,7 @@ class ModelInferencer:
             logger.error(f"Model loading failed: {str(e)}")
             raise
 
-    def _preprocess_image(self, input_image: ImageFile) -> torch.Tensor:
+    def _preprocess_image(self, input_image: Image) -> torch.Tensor:
         try:
             image = input_image.convert('RGB')
             transform = transforms.Compose([
@@ -55,16 +57,25 @@ class ModelInferencer:
             logger.error(f"Error preprocessing image: {str(e)}")
             raise
 
-    def predict(self, input_image: ImageFile) -> Tuple[str, float]:
+    def predict(self, input_data: Union[Image.Image, bytes]) -> Tuple[str, float]:
         try:
             if not self.model:
                 raise ValueError("Model not loaded. Please load the model first.")
+                
+            if isinstance(input_data, bytes):
+                input_image = Image.open(BytesIO(input_data))
+            else:
+                input_image = input_data
+                
             input_tensor = self._preprocess_image(input_image)
             with torch.no_grad():
-                probabilities = self.model(input_tensor)
-                predicted_class = torch.argmax(probabilities, dim=1).item()
-                confidence = torch.max(probabilities).item()
-                return self.class_names[predicted_class], confidence
+                outputs = self.model.forward(input_tensor).to(self.device)
+                probabilities = F.softmax(outputs, dim=1)
+                predicted = probabilities.argmax(dim=1)
+                confidence = probabilities.max().item()
+                predicted_class = self.class_names[predicted.item()]
+                probabilities_dict = {class_name: probabilities[i].item() for i, class_name in enumerate(self.class_names)}
+                return predicted_class, confidence, probabilities_dict
         except Exception as e:
             logger.error(f"Error during prediction: {str(e)}")
             raise

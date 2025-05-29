@@ -20,7 +20,6 @@ class BasicCNNModel(nn.Module):
         self.fc2 = nn.Linear(128, 32)
         self.relu5 = nn.ReLU()
         self.fc3 = nn.Linear(32, num_classes)
-        self.softmax = nn.Softmax(dim=1)
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv1(x)
@@ -38,7 +37,4 @@ class BasicCNNModel(nn.Module):
         x = self.fc2(x)
         x = self.relu5(x)
         x = self.fc3(x)
-        x = self.softmax(x)
         return x
-    
-

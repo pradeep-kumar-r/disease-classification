@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Literal, Optional
 import torch
 from torch import nn
+from torch.nn import functional as F
 import numpy as np
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
 from CNNClassifier.logger import logger
@@ -19,6 +20,7 @@ class ModelEvaluator:
         self.model = model
         self.model.to(self.device)
         self.dataloader = dataloader
+        self.class_names = list(self.dataloader.class_to_idx.keys())
         self.criterion = criterion
         self.report_save_path = report_save_path
         self.confusion_matrix = None
@@ -36,14 +38,20 @@ class ModelEvaluator:
                 for input_data, label in self.dataloader:
                     input_data, label = input_data.to(self.device), label.to(self.device)
                     self.labels = np.append(self.labels, label.numpy())
-                    probabilities = self.model(input_data)
-                    _, predicted = probabilities.max(1)
+                    outputs = self.model.forward(input_data)
+                    probabilities = F.softmax(outputs, dim=1)
+                    predicted = probabilities.argmax(dim=1)
                     self.probabilities = np.append(self.probabilities, probabilities.numpy())
                     self.predictions = np.append(self.predictions, predicted.numpy())
                     
             self.accuracy = accuracy_score(self.labels, self.predictions)
-            self.confusion_matrix = confusion_matrix(self.labels, self.predictions)
-            self.classification_report = classification_report(self.labels, self.predictions)
+            self.confusion_matrix = confusion_matrix(self.labels, 
+                                                     self.predictions, 
+                                                     labels=self.class_names)
+            self.classification_report = classification_report(self.labels, 
+                                                               self.predictions,
+                                                               labels=self.class_names,
+                                                               target_names=self.class_names)
             logger.info("Evaluation"
                         f"Acc: {self.accuracy:.4f}"
                         f"Confusion Matrix: \n{self.confusion_matrix}"

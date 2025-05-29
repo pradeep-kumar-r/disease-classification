@@ -5,6 +5,7 @@ from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.nn import functional as F
 from CNNClassifier.logger import logger
 from CNNClassifier.components.dataset_loader import DatasetLoader
 
@@ -46,12 +47,13 @@ class ModelTrainer:
             
             self.optimizer.zero_grad()
             outputs = self.model.forward(inputs)
-            loss = self.criterion(outputs, labels)
+            probabilities = F.softmax(outputs, dim=1)
+            loss = self.criterion(probabilities, labels)
             loss.backward()
             self.optimizer.step()
 
             epoch_loss += loss.item()
-            _, predicted = outputs.max(1)
+            predicted = probabilities.argmax(dim=1)
             total += labels.size(0)
             correct += predicted.eq(labels).sum().item()
             
@@ -74,11 +76,12 @@ class ModelTrainer:
         with torch.no_grad():
             for inputs, labels in self.val_dataloader:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                outputs = self.model(inputs)
-                loss = self.criterion(outputs, labels)
+                outputs = self.model.forward(inputs)
+                probabilities = F.softmax(outputs, dim=1)
+                loss = self.criterion(probabilities, labels)
 
                 val_loss += loss.item()
-                _, predicted = outputs.max(1)
+                predicted = probabilities.argmax(dim=1)
                 total += labels.size(0)
                 correct += predicted.eq(labels).sum().item()
 
