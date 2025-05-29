@@ -4,6 +4,8 @@ from pathlib import Path
 from fastapi import FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+from PIL import Image
+from io import BytesIO
 from app.logger import logger
 from app.backend.datamodels import ClassPrediction, PredictionResult, PredictionResponse, ErrorResponse
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../src')))
@@ -107,7 +109,8 @@ async def predict(
                     }
             )
         logger.info(f"Processing image: {file.filename} ({len(contents)} bytes)")
-        predicted_class, confidence, probabilities_dict = await inferencer.predict(contents)
+        image = Image.open(BytesIO(contents))
+        predicted_class, confidence, probabilities_dict = inferencer.predict(image)
         logger.info(
             f"Prediction successful - {file.filename}: "
             f"{predicted_class} (confidence: {confidence:.2f})"

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-from CNNClassifier.utils import read_yaml
+import yaml
 
 
 @dataclass(frozen=True)
@@ -49,6 +49,11 @@ class TrainingPipelineConfig:
     train_dataset_path: Path
     val_dataset_path: Path
     test_dataset_path: Path
+   
+
+@dataclass(frozen=True)
+class LogsConfig:
+    logs_folder_path: Path
 
 
 @dataclass(frozen=True)
@@ -58,7 +63,8 @@ class Config:
     artefacts_config: ArtefactsConfig
     model_training_config: ModelTrainingConfig
     training_pipeline_config: TrainingPipelineConfig
-
+    logs_config: LogsConfig
+ 
 
 # Singleton config manager
 class ConfigManager:
@@ -68,7 +74,8 @@ class ConfigManager:
         if cls._instance is None:
             cls._instance = super(ConfigManager, cls).__new__(cls)
             load_dotenv()
-            cls.config_yaml = read_yaml(Path("config.yaml"))
+            with open("config.yaml", "r") as file:
+                cls.config_yaml = yaml.safe_load(file)
             cls._set_config()
         return cls._instance
     
@@ -110,12 +117,16 @@ class ConfigManager:
             val_dataset_path=Path(cls.config_yaml['val_data_folder_path']) / "val_data.pt",
             test_dataset_path=Path(cls.config_yaml['test_data_folder_path']) / "test_data.pt"
         )
+        logs_config = LogsConfig(
+            logs_folder_path=Path(cls.config_yaml['logs_folder_path'])
+        )
         cls.config = Config(
             data_downloader_config=data_downloader_config,
             data_pipeline_config=data_pipeline_config,
             artefacts_config=artefacts_config,
             model_training_config=model_training_config,
-            training_pipeline_config=training_pipeline_config
+            training_pipeline_config=training_pipeline_config,
+            logs_config=logs_config
         )
     
     @classmethod

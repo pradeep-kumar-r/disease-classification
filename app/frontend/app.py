@@ -38,7 +38,7 @@ def display_prediction(img, predictions):
     max_disease = max(predictions, key=predictions.get)
     st.success(f"Most likely: **{max_disease}** ({predictions[max_disease]:.1%} probability)")
 
-tab1 = st.tabs(["Single Image"])
+tab1 = st.tabs(["Single Image"])[0]
 
 with tab1:
     uploaded_file = st.file_uploader(
@@ -48,28 +48,37 @@ with tab1:
     )
 
     if uploaded_file:
+        # First read the image for display
         image = Image.open(uploaded_file)
         st.image(image, use_column_width=True)
 
         if st.button("Analyze Single Image", key="single_btn"):
             with st.spinner("Processing..."):
                 try:
+                    # Reset file pointer to the beginning before sending
+                    uploaded_file.seek(0)
+                    
+                    # Create a tuple with filename, file object, and content type
+                    files = {
+                        'file': (uploaded_file.name, uploaded_file, 'image/jpeg')
+                    }
                     response = requests.post(
                         f"{API_URL}/predict",
-                        files={"file": uploaded_file},
+                        files=files,
                         timeout=30
                     )
 
                     if response.status_code == 200:
                         result = response.json()
-                        display_prediction(image, result["predictions"])
+                        probabilities = result['predictions']['probabilities']
+                        display_prediction(image, probabilities)
 
                         df = pd.DataFrame({
-                            'Disease': list(result['predictions'].keys()),
-                            'Probability': list(result['predictions'].values())
+                            'Disease': list(probabilities.keys()),
+                            'Probability': list(probabilities.values())
                         })
                         df['Probability'] = df['Probability'].apply(lambda x: f"{x:.1%}")
-                        st.dataframe(df.style.format({'Probability': '{:.1%}'}), hide_index=True)
+                        st.dataframe(df[['Disease', 'Probability']].reset_index(drop=True))
                     else:
                         st.error(f"API Error: {response.json()['detail']}")
                 except requests.exceptions.RequestException as e:

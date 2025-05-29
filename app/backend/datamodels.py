@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, confloat
 from typing import Optional, Dict
-from datetime import datetime
 
 
 class ClassPrediction(BaseModel):
@@ -17,7 +16,6 @@ class PredictionResult(BaseModel):
 class ErrorResponse(BaseModel):
     detail: str = Field(..., description="Error message describing what went wrong")
     error_type: str = Field(..., description="Type of error that occurred")
-    timestamp: datetime = Field(default_factory=datetime.now(datetime.timezone.utc))
 
 
 class PredictionResponse(BaseModel):

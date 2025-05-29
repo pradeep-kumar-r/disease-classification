@@ -72,9 +72,9 @@ class ModelInferencer:
                 outputs = self.model.forward(input_tensor).to(self.device)
                 probabilities = F.softmax(outputs, dim=1)
                 predicted = probabilities.argmax(dim=1)
-                confidence = probabilities.max().item()
+                confidence = probabilities[0][predicted.item()].item()
                 predicted_class = self.class_names[predicted.item()]
-                probabilities_dict = {class_name: probabilities[i].item() for i, class_name in enumerate(self.class_names)}
+                probabilities_dict = {class_name: probabilities[0][i].item() for i, class_name in enumerate(self.class_names)}
                 return predicted_class, confidence, probabilities_dict
         except Exception as e:
             logger.error(f"Error during prediction: {str(e)}")

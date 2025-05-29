@@ -38,10 +38,10 @@ class ModelEvaluator:
                 for input_data, label in self.dataloader:
                     input_data, label = input_data.to(self.device), label.to(self.device)
                     self.labels = np.append(self.labels, label.numpy())
-                    outputs = self.model.forward(input_data)
+                    outputs = self.model.forward(input_data).to(self.device)
                     probabilities = F.softmax(outputs, dim=1)
                     predicted = probabilities.argmax(dim=1)
-                    self.probabilities = np.append(self.probabilities, probabilities.numpy())
+                    self.probabilities = np.vstack((self.probabilities, probabilities.numpy()))
                     self.predictions = np.append(self.predictions, predicted.numpy())
                     
             self.accuracy = accuracy_score(self.labels, self.predictions)

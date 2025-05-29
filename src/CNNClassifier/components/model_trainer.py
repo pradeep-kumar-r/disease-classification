@@ -46,7 +46,7 @@ class ModelTrainer:
             inputs, labels = inputs.to(self.device), labels.to(self.device)
             
             self.optimizer.zero_grad()
-            outputs = self.model.forward(inputs)
+            outputs = self.model.forward(inputs).to(self.device)
             probabilities = F.softmax(outputs, dim=1)
             loss = self.criterion(probabilities, labels)
             loss.backward()
@@ -76,7 +76,7 @@ class ModelTrainer:
         with torch.no_grad():
             for inputs, labels in self.val_dataloader:
                 inputs, labels = inputs.to(self.device), labels.to(self.device)
-                outputs = self.model.forward(inputs)
+                outputs = self.model.forward(inputs).to(self.device)
                 probabilities = F.softmax(outputs, dim=1)
                 loss = self.criterion(probabilities, labels)
 
