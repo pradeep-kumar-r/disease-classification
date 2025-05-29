@@ -8,6 +8,6 @@ artefacts_folder_path: artefacts/
 train_split: 0.7
 val_split: 0.1
 batch_size: 32
-num_epochs: 20
+num_epochs: 50
 learning_rate: 0.001
 kaggle_dataset_path: allandclive/chicken-disease-1

@@ -1,10 +1,10 @@
-import streamlit as st
 import io
+import os
 import requests
+import streamlit as st
 from PIL import Image
 import matplotlib.pyplot as plt
 import pandas as pd
-import os
 
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
@@ -132,6 +132,5 @@ with tab2:
 st.sidebar.markdown("## About")
 st.sidebar.info(
     "This AI-powered tool helps identify common chicken diseases "
-    "from fecal images using deep learning models. "
-    "[Learn More](https://example.com)"
+    "from fecal images using deep learning models."
 )

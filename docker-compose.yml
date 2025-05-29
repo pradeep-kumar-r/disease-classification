@@ -3,20 +3,24 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./app/backend
+      context: ..
+      dockerfile: app/backend/Dockerfile
     ports:
       - "8000:8000"
     environment:
       - ENV=production
     volumes:
-      - ./app/backend:/app
+      - ./backend:/app
+    restart: unless-stopped
 
   frontend:
     build:
-      context: ./app/frontend
+      context: ..
+      dockerfile: app/frontend/Dockerfile
     ports:
       - "8501:8501"
     environment:
       - API_URL=http://backend:8000
     depends_on:
       - backend
+    restart: unless-stopped
