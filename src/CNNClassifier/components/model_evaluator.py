@@ -20,7 +20,7 @@ class ModelEvaluator:
         self.model = model
         self.model.to(self.device)
         self.dataloader = dataloader
-        self.class_names = list(self.dataloader.class_to_idx.keys())
+        self.class_names = list(self.dataloader.dataset.class_to_idx.keys())
         self.criterion = criterion
         self.report_save_path = report_save_path
         self.confusion_matrix = None
